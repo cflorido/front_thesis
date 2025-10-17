@@ -708,29 +708,12 @@ if (selectedGraphType === 'destinations') {
   }
   window.maxOrigen = Math.max(...viajesPorCelda_origen);
   window.maxDestino = Math.max(...viajesPorCelda_destino);
-} else if (selectedGraphType === 'difference') {
+} else if (selectedGraphType === 'difference') {  // ← AGREGAR DESDE AQUÍ
   const { OD: OD_original } = await loadCSVData(folder, paramStr, 'original');
   const { OD: OD_perturbada } = await loadCSVData(folder, paramStr, 'perturbada');
-  
-  // Calcular diferencia TOTAL por celda (igual que en generateDifference)
-  const diferencias = OD_original.map((row, i) => {
-    let diff_total = 0;
-    
-    // Diferencia de viajes DESDE esta celda (fila i completa)
-    for (let j = 0; j < row.length; j++) {
-      diff_total += Math.abs((OD_original[i][j] || 0) - (OD_perturbada[i][j] || 0));
-    }
-    
-    // Diferencia de viajes HACIA esta celda (columna i completa)
-    for (let j = 0; j < OD_original.length; j++) {
-      if (j !== i) { // Evitar contar dos veces la diagonal
-        diff_total += Math.abs((OD_original[j][i] || 0) - (OD_perturbada[j][i] || 0));
-      }
-    }
-    
-    return diff_total;
-  });
-  
+  const diferencias = OD_original.map((row, i) => 
+    Math.abs((OD_original[i][i] || 0) - (OD_perturbada[i][i] || 0))
+  );
   maxViajesForLegend = Math.max(...diferencias);
 }
       let mapContent = '';
@@ -1005,28 +988,26 @@ if (selectedGraphType === 'destinations') {
             </h1>
           </div>
 
-{selectedGraphType !== 'difference' && (
-  <div className="flex items-center gap-3">
-    <span className={`text-sm font-medium transition-colors ${showOriginal ? 'text-purple-400' : 'text-slate-400'}`}>
-      Original
-    </span>
-    <button
-      onClick={() => setShowOriginal(!showOriginal)}
-      className={`relative w-16 h-8 rounded-full transition-all duration-300 ${
-        showOriginal ? 'bg-purple-500' : 'bg-orange-500'
-      }`}
-    >
-      <div
-        className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${
-          showOriginal ? 'translate-x-0' : 'translate-x-8'
-        }`}
-      />
-    </button>
-    <span className={`text-sm font-medium transition-colors ${!showOriginal ? 'text-orange-400' : 'text-slate-400'}`}>
-      Perturbada
-    </span>
-  </div>
-)}
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium transition-colors ${showOriginal ? 'text-purple-400' : 'text-slate-400'}`}>
+              Original
+            </span>
+            <button
+              onClick={() => setShowOriginal(!showOriginal)}
+              className={`relative w-16 h-8 rounded-full transition-all duration-300 ${
+                showOriginal ? 'bg-purple-500' : 'bg-orange-500'
+              }`}
+            >
+              <div
+                className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                  showOriginal ? 'translate-x-0' : 'translate-x-8'
+                }`}
+              />
+            </button>
+            <span className={`text-sm font-medium transition-colors ${!showOriginal ? 'text-orange-400' : 'text-slate-400'}`}>
+              Perturbada
+            </span>
+          </div>
         </div>
 
         <div className="flex-1 bg-slate-900 p-6">
